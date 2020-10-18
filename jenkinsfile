@@ -17,7 +17,7 @@ pipeline {
                     sh 'docker pull maven:3-alpine'
                     sh 'docker container run -i --name toxic -v  /home/asher/Desktop/JENKINS-CI-CD-AWS-ToxicTypoProject-master:/app maven:3-alpine bash'
                     sh 'docker container start toxic'
-                    sh 'docker container exec -i asher bash'
+                    sh 'docker container exec -i toxic bash'
                     sh 'pwd'
                     
                 }
