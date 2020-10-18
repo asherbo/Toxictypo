@@ -2,24 +2,11 @@ pipeline{
   agent any
 
       tools {
-        jdk 'jdk-8'  
         maven 'maven-3.6.2'
     }
 
-    
     stages{
-    
-    stage('---Clone From GitHub---') 
-        {
-            steps 
-            {
-                git 'https://github.com/asherbo/Toxictypo.git'
-                sh 'rm -rf .git'
-            }
-        }
-
-     stage("build")
-     {
+     stage("build"){
         steps{
             script{
                 sh 'mvn verify'
@@ -33,12 +20,7 @@ pipeline{
         always { 
             sh 'docker rm -f toxic || true'
         }
-        failure {
-                updateGitlabCommitStatus state: 'failed'
-            }
-        success {
-                updateGitlabCommitStatus state: 'success'
-            }
+
        }
 
     }
