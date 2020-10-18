@@ -8,8 +8,7 @@
       }
     }
 
-    stages 
-
+    stages {
      stage ("build") {
         steps{
             script{
