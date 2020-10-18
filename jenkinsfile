@@ -1,26 +1,20 @@
-pipeline{
+pipeline
+{
   agent any
-
-      tools {
+  
+      tools 
+      {
         maven 'maven-3.6.2'
-    }
+      }
 
     stages{
-     stage("build"){
-        steps{
-            script{
-                sh 'mvn verify'
-                sh 'docker build --tag=toxictypoapp .'
-                sh 'docker run -d --network host-compose --name=toxic -p 8085:8080 toxictypoapp'
-                }
+    
+        stage('---Clone From GitHub---') 
+        {
+            steps 
+            {
+                git 'https://github.com/asherbo/Toxictypo.git'
+                sh 'rm -rf .git'
             }
         }
-
-     post { 
-        always { 
-            sh 'docker rm -f toxic || true'
-        }
-
-       }
-
     }
