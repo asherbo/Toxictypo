@@ -4,6 +4,7 @@ pipeline {
         stage('---Clone From GitHub---') {
             steps {
                 git 'https://github.com/asherbo/Toxictypo.git'
+                sh 'rm -rf .git'
             }
         }
 
