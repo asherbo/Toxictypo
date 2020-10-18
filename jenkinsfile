@@ -15,7 +15,7 @@ pipeline {
                 script
                 {   
                     sh 'docker pull maven:3-alpine'
-                    sh 'docker run -it -v docker container run -ti -v  /home/asher/Desktop/JENKINS-CI-CD-AWS-ToxicTypoProject-master:/app maven:3-alpine sh'
+                    sh 'docker run -it -v docker container run -i -v  /home/asher/Desktop/JENKINS-CI-CD-AWS-ToxicTypoProject-master:/app maven:3-alpine sh'
                 }
             }
         }
