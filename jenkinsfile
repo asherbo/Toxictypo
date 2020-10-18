@@ -19,6 +19,7 @@ pipeline {
                     sh 'docker container start toxic'
                     sh 'docker container exec -i toxic bash'
                     sh 'pwd'
+                    sh 'docker container rm -f toxic'
                     
                 }
             }
