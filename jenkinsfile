@@ -1,20 +1,77 @@
-pipeline
-{
-  agent any
-  
-      tools 
-      {
-        maven 'maven-3.6.2'
-      }
 
-    stages{
+  pipeline{
+  agent any
+
+    triggers {
+        gitlab(
+            triggerOnPush: true, 
+            triggerOnMergeRequest: true,
+            branchFilterType: 'All',
+            addVoteOnMergeRequest: true)
+    }
+
+      tools {
+        jdk 'jdk-8'  
+        maven 'maven-3.6.2'
+    }
+
     
-        stage('---Clone From GitHub---') 
-        {
-            steps 
-            {
-                git 'https://github.com/asherbo/Toxictypo.git'
-                sh 'rm -rf .git'
+    stages{
+
+     stage("build"){
+        steps{
+            script{
+                sh 'mvn verify'
+                sh 'docker build --tag=toxictypoapp .'
+                sh 'docker run -d --network host-compose --name=toxic -p 8085:8080 toxictypoapp'
+                }
             }
         }
+    stage("test"){
+        agent{
+            docker { image 'python:2.7-alpine3.11'
+                     args '--network host-compose -u root:root' }
+        }
+        steps{
+            script{
+		        withEnv(["HOME=${env.WORKSPACE}"]) {
+                    sh 'pwd'
+                    sh 'pip install -r src/test/requirments.txt'
+                    sh 'python src/test/e2e_test.py toxic:8080 /var/jenkins_home/workspace/toxictypoapp_master/src/test/sanity 5'
+                } 
+                }
+            }
+         }
+    stage('Publish') {
+        steps{
+        script{
+            docker.withRegistry('https://505277722857.dkr.ecr.eu-central-1.amazonaws.com', 'ecr:eu-central-1:toxictypoapp') {
+                sh "docker push 505277722857.dkr.ecr.eu-central-1.amazonaws.com/toxictypoapp:latest"
+                    }
+                }
+            }
+        }
+    stage('Deploy') {
+        steps{
+        script{
+            sshagent(['00bcae52-12fb-48bb-ba48-d263aeb7e7f2']) {
+                sh "ssh -o StrictHostKeyChecking=no -l ec2-user ec2-52-28-239-168.eu-central-1.compute.amazonaws.com 'docker pull 505277722857.dkr.ecr.eu-central-1.amazonaws.com/toxictypoapp:latest && docker rm -f toxictypoapp || true && docker run --name toxictypoapp -d -p 8085:8085 505277722857.dkr.ecr.eu-central-1.amazonaws.com/toxictypoapp:latest'"     
+                    }
+                }
+            }
+        }    
+
+        }
+     post { 
+        always { 
+            sh 'docker rm -f toxic || true'
+        }
+        failure {
+                updateGitlabCommitStatus state: 'failed'
+            }
+        success {
+                updateGitlabCommitStatus state: 'success'
+            }
+       }
+
     }
