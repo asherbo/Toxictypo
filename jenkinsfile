@@ -15,9 +15,7 @@ pipeline {
                 script
                 {   
                     sh 'docker pull maven:3-alpine'
-                    sh 'mvn verify'
-                    sh 'docker build --tag=toxictypoapp .'
-                    sh 'docker run -d --network host-compose --name=toxic -p 8085:8080 toxictypoapp'
+                    sh 'docker run -it -v /var/jenkins_home/workspace/ToxicTypo:/app maven:3-alpine sh'
                 }
             }
         }
